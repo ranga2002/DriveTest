@@ -1,0 +1,44 @@
+<!-- layouts/navbar.ejs -->
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <a href="/" class="navbar-brand d-flex align-items-center border-end px-4 px-lg-5">
+        <h2 class="m-0"><i class="fa fa-car text-primary me-2"></i>TheDriveTest</h2>
+    </a>
+    <button type="button" class="navbar-toggler me-4" data-bs-toggle="collapse" data-bs-target="#navbarCollapse">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ms-auto p-4 p-lg-0">
+            <li class="nav-item">
+                <a class="nav-link" href="/">Home</a>
+            </li>
+            <% if (isAuthenticated) { %>
+                <% if (userType === 'Driver') { %>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/gtest">GTest</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/g2test">G2Test</a>
+                    </li>
+                <% } else if (userType === 'Admin') { %>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/appointment">Appointments</a>
+                    </li>
+                <% } %>
+            <% } %>
+        </ul>
+        <ul class="navbar-nav ml-auto">
+            <% if (isAuthenticated) { %>
+                <li class="nav-item">
+                    <a class="nav-link" href="/logout">Logout</a>
+                </li>
+            <% } else { %>
+                <li class="nav-item">
+                    <a class="nav-link" href="/login">Login</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/signup">Sign Up</a>
+                </li>
+            <% } %>
+        </ul>
+    </div>
+</nav>

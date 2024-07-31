@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<%- include('layouts/header') -%>
+<body>
+    <%- include('layouts/topbar') -%>
+    <%- include('layouts/navbar', { isAuthenticated: isAuthenticated, userType: userType }) -%>
+
+    <div class="container-fluid page-header py-6 my-6 mt-0 wow fadeIn" data-wow-delay="0.1s">
+        <div class="container text-center">
+            <h1 class="display-4 text-white animated slideInDown mb-4">G2 Test</h1>
+            <nav aria-label="breadcrumb animated slideInDown">
+                <ol class="breadcrumb justify-content-center mb-0">
+                    <li class="breadcrumb-item"><a class="text-white" href="/">Home</a></li>
+                    <li class="breadcrumb-item text-primary active" aria-current="page">G2 Test</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+
+    <div class="container-xxl py-6">
+        <div class="container">
+            <h1>G2 Test</h1>
+
+            <% if (user) { %>
+                <!-- Display messages -->
+                <% if (successMessage || errorMessage) { %>
+                    <div class="alert <%= successMessage ? 'alert-success' : 'alert-danger' %>">
+                        <%= successMessage || errorMessage %>
+                    </div>
+                <% } %>
+
+                <!-- User Details Form -->
+                <form action="/g2test/update" method="POST">
+                    <% const fields = [
+                        { id: 'firstName', label: 'First Name', value: user.firstName },
+                        { id: 'lastName', label: 'Last Name', value: user.lastName },
+                        { id: 'encryptedLicenseNumber', label: 'License Number', value: user.encryptedLicenseNumber },
+                        { id: 'age', label: 'Age', value: user.age, type: 'number' },
+                        { id: 'dob', label: 'Date of Birth', value: user.dob ? user.dob.toISOString().split('T')[0] : '', type: 'date' },
+                        { id: 'carMake', label: 'Car Make', value: user.carDetails?.carMake },
+                        { id: 'carModel', label: 'Car Model', value: user.carDetails?.carModel },
+                        { id: 'carYear', label: 'Car Year', value: user.carDetails?.carYear, type: 'number' },
+                        { id: 'carPlate', label: 'Car Plate', value: user.carDetails?.carPlate }
+                    ]; %>
+                    <% fields.forEach(field => { %>
+                        <div class="form-group">
+                            <label for="<%= field.id %>"><%= field.label %>:</label>
+                            <input type="<%= field.type || 'text' %>" class="form-control" name="<%= field.id %>" value="<%= field.value %>" required>
+                        </div>
+                    <% }); %>
+                    <button type="submit" class="btn btn-primary">Update Details</button>
+
+                </form>
+
+                <!-- Appointment Information -->
+                <% if (user.appointments.length > 0) { %>
+                    <h2>Your Booked Appointment</h2>
+                    <% 
+                        const appointment = user.appointments[0];
+                        const formattedDate = new Date(appointment.date).toISOString().split('T')[0]; // YYYY-MM-DD
+                        const formatTime = (timeStr) => {
+                            const [hours, minutes] = timeStr.split(':').map(Number);
+                            const period = hours >= 12 ? 'PM' : 'AM';
+                            return `${(hours % 12 || 12)}:${minutes.toString().padStart(2, '0')} ${period}`;
+                        };
+                        const formattedTime = formatTime(appointment.time.substring(0, 5)); // Extract time and format
+                    %>
+                    <p>Date: <%= formattedDate %></p>
+                    <p>Time: <%= formattedTime %></p>
+                <% } else { %>
+                    <h2>Book an Appointment</h2>
+                    <!-- Appointment Booking Form -->
+                    <form action="/g2test/book" method="POST">
+                        <div class="form-group">
+                            <label for="appointmentDate">Appointment Date:</label>
+                            <input type="date" class="form-control" id="appointmentDate" name="appointmentDate" required onchange="fetchAvailableSlots(this.value)">
+                        </div>
+                        <div class="form-group" id="timeSlotsContainer" style="display:none;">
+                            <label for="timeSlot">Available Time Slots:</label>
+                            <div id="timeSlots" class="form-control"></div>
+                        </div>
+                        <input type="hidden" id="selectedTimeSlot" name="selectedTimeSlot" required>
+                        <button type="submit" class="btn btn-primary">Book Appointment</button>
+                    </form>
+                <% } %>
+            <% } else { %>
+                <p>Please <a href="/login">login</a> to view and book appointments.</p>
+            <% } %>
+        </div>    
+    </div>
+
+    <script>
+        function selectTimeSlot(time) {
+            document.getElementById('selectedTimeSlot').value = time;
+        }
+
+        async function fetchAvailableSlots(selectedDate) {
+            try {
+                const response = await fetch(`/g2test/available-slots?date=${selectedDate}`);
+                if (!response.ok) throw new Error('Network response was not ok');
+                const slots = await response.json();
+                const timeSlotsContainer = document.getElementById('timeSlotsContainer');
+                const timeSlots = document.getElementById('timeSlots');
+
+                timeSlots.innerHTML = ''; // Clear previous slots
+                if (slots.length > 0) {
+                    timeSlotsContainer.style.display = 'block';
+                    slots.forEach(slot => {
+                        const button = document.createElement('button');
+                        button.type = 'button';
+                        button.className = 'btn btn-secondary m-1';
+                        button.innerText = formatTimeTo12Hour(slot.time);
+                        button.disabled = !slot.isTimeSlotAvailable;
+                        button.onclick = () => selectTimeSlot(slot.time);
+                        timeSlots.appendChild(button);
+                    });
+                } else {
+                    timeSlotsContainer.style.display = 'none';
+                    timeSlots.innerHTML = '<p>No available slots for this date.</p>';
+                }
+            } catch (error) {
+                console.error('Error fetching available slots:', error);
+                document.getElementById('timeSlotsContainer').style.display = 'none';
+                document.getElementById('timeSlots').innerHTML = '<p>Error fetching available slots.</p>';
+            }
+        }
+
+        function formatTimeTo12Hour(timeStr) {
+            const [hours, minutes] = timeStr.split(':').map(Number);
+            const period = hours >= 12 ? 'PM' : 'AM';
+            return `${(hours % 12 || 12)}:${minutes.toString().padStart(2, '0')} ${period}`;
+        }
+    </script>
+
+    <%- include('layouts/footer') -%>
+    <%- include('layouts/scripts') -%>
+</body>
+</html>

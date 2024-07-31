@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<%- include('layouts/header') -%>
+
+<body>
+    <!-- Topbar Start -->
+    <%- include('layouts/topbar') -%>
+    <!-- Topbar End -->
+
+    <!-- Navbar Start -->
+    <%- include('layouts/navbar', { isAuthenticated: isAuthenticated, userType: userType }) -%>
+    <!-- Navbar End -->
+
+    <div class="container">
+        <h1>Manage Appointments</h1>
+        <% if (typeof message !== 'undefined' && message) { %>
+            <div class="alert alert-success" role="alert">
+                <%= message %>
+            </div>
+        <% } %>
+        <form action="/appointments" method="POST">
+            <div class="form-group">
+                <label for="date">Date:</label>
+                <input type="date" id="date" name="date" class="form-control" required onchange="fetchPublishedSlots()">
+            </div>
+            <div class="form-group">
+                <label>Time Slots:</label>
+                <div id="timeSlots" class="form-control">
+                    <% 
+                        // Function to format time to 12-hour format with AM/PM
+                        function formatTimeTo12Hour(timeStr) {
+                            const [hours, minutes] = timeStr.split(':').map(Number);
+                            const period = hours >= 12 ? 'PM' : 'AM';
+                            const formattedHours = hours % 12 || 12; // Convert hour to 12-hour format
+                            const formattedMinutes = minutes.toString().padStart(2, '0');
+                            return `${formattedHours}:${formattedMinutes} ${period}`;
+                        }
+
+                        const times = ["09:00", "10:00", "11:00", "12:00", "13:00", "14:00"];
+                    %>
+                    <% times.forEach(time => { %>
+                        <% const formattedTime = formatTimeTo12Hour(time); %>
+                        <button type="button" class="btn btn-secondary" id="slot-<%= time %>" onclick="addTimeSlot('<%= time %>')"><%= formattedTime %></button>
+                    <% }) %>
+                </div>
+            </div>
+            <div id="selectedTimeSlots" class="form-group"></div>
+            <button type="submit" class="btn btn-primary">Save Appointments</button>
+        </form>
+              
+    </div>
+
+    <!-- Modal for error message -->
+    <div class="modal fade" id="errorModal" tabindex="-1" role="dialog" aria-labelledby="errorModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="errorModalLabel">Time Slot Already Booked</h5>
+                </div>
+                <div class="modal-body">
+                    One or more time slots are already booked. Please choose a different time slot.
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" onclick="window.location.href='/appointment'">Go to Appointments Page</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <%- include('layouts/footer') -%>
+
+    <!-- Back to Top -->
+    <a href="#" class="btn btn-lg btn-primary btn-lg-square back-to-top"><i class="bi bi-arrow-up"></i></a>
+
+    <%- include('layouts/scripts') -%>
+
+    <!-- Include jQuery and Bootstrap JS for modal functionality -->
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+
+    <script>
+        function addTimeSlot(time) {
+            const selectedTimeSlots = document.getElementById('selectedTimeSlots');
+            const timeSlotInput = document.createElement('input');
+            timeSlotInput.type = 'hidden';
+            timeSlotInput.name = 'timeSlots[]';
+            timeSlotInput.value = time;
+            selectedTimeSlots.appendChild(timeSlotInput);
+
+            const timeSlotLabel = document.createElement('span');
+            timeSlotLabel.textContent = formatTimeTo12Hour(time);
+            timeSlotLabel.className = 'badge badge-secondary m-1';
+            selectedTimeSlots.appendChild(timeSlotLabel);
+        }
+
+        function formatTimeTo12Hour(timeStr) {
+            const [hours, minutes] = timeStr.split(':').map(Number);
+            const period = hours >= 12 ? 'PM' : 'AM';
+            const formattedHours = hours % 12 || 12; // Convert hour to 12-hour format
+            const formattedMinutes = minutes.toString().padStart(2, '0');
+            return `${formattedHours}:${formattedMinutes} ${period}`;
+        }
+
+        function fetchPublishedSlots() {
+            const date = document.getElementById('date').value;
+            if (!date) return;
+
+            fetch(`/appointments/slots/${date}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const publishedSlots = data.publishedSlots;
+                        const times = ["09:00", "10:00", "11:00", "12:00", "13:00", "14:00"];
+                        times.forEach(time => {
+                            const slotButton = document.getElementById(`slot-${time}`);
+                            if (publishedSlots.includes(time)) {
+                                slotButton.disabled = true;
+                                slotButton.classList.add('disabled');
+                            } else {
+                                slotButton.disabled = false;
+                                slotButton.classList.remove('disabled');
+                            }
+                        });
+                    } else {
+                        console.error('Error fetching published slots:', data.message);
+                    }
+                })
+                .catch(err => console.error('Fetch error:', err));
+        }
+
+        // Show the error modal if there's an error message
+        <% if (error) { %>
+            document.addEventListener('DOMContentLoaded', function() {
+                $('#errorModal').modal('show');
+            });
+        <% } %>
+    </script>
+</body>
+</html>

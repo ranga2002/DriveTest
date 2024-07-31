@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<%- include('layouts/header') -%>
+<body>
+    <!-- Topbar Start -->
+    <%- include('layouts/topbar') -%>
+    <!-- Topbar End -->
+
+    <!-- Navbar Start -->
+    <%- include('layouts/navbar') -%>
+    <!-- Navbar End -->
+
+    <!-- Page Header Start -->
+    <div class="container-fluid page-header py-6 my-6 mt-0 wow fadeIn" data-wow-delay="0.1s">
+        <div class="container text-center">
+            <h1 class="display-4 text-white animated slideInDown mb-4">Login</h1>
+            <nav aria-label="breadcrumb animated slideInDown">
+                <ol class="breadcrumb justify-content-center mb-0">
+                    <li class="breadcrumb-item"><a class="text-white" href="/">Home</a></li>
+                    <li class="breadcrumb-item text-primary active" aria-current="page">Login</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+    <!-- Page Header End -->
+
+    <!-- Login Form -->
+    <div class="container-xxl">
+        <div class="container">
+            <div class="login-box">
+                <div class="login-head">
+                    <h1>Welcome</h1>
+                </div>
+
+                <!-- Display flash messages -->
+                <% if (successMessage) { %>
+                    <p style="color: green;"><%= successMessage %></p>
+                <% } %>
+                <% if (errorMessage) { %>
+                    <p style="color: red;"><%= errorMessage %></p>
+                <% } %>
+
+                <!-- Login Form -->
+                <div class="form-placeholder" id="loginForm">
+                    <h2>Login</h2>
+                    <form action="/login" method="POST">
+                        <label for="username">Username</label>
+                        <input type="text" id="username" name="username" placeholder="Enter your username" required>
+                        <label for="password">Password</label>
+                        <input type="password" id="password" name="password" placeholder="Enter your password" required>
+                        <button type="submit" class="submit-button">Login</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Login End -->
+
+    <%- include('layouts/footer') -%>
+
+    <!-- Back to Top -->
+    <a href="#" class="btn btn-lg btn-primary btn-lg-square back-to-top"><i class="bi bi-arrow-up"></i></a>
+
+    <%- include('layouts/scripts') -%>
+</body>
+</html>
