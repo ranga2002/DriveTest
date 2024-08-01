@@ -1,4 +1,3 @@
-<!-- layouts/navbar.ejs -->
 <nav class="navbar navbar-expand-lg navbar-light bg-light">
     <a href="/" class="navbar-brand d-flex align-items-center border-end px-4 px-lg-5">
         <h2 class="m-0"><i class="fa fa-car text-primary me-2"></i>TheDriveTest</h2>
@@ -19,9 +18,16 @@
                     <li class="nav-item">
                         <a class="nav-link" href="/g2test">G2Test</a>
                     </li>
+                <% } else if (userType === 'Examiner') { %>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/examiner">Examiner</a>
+                    </li>
                 <% } else if (userType === 'Admin') { %>
                     <li class="nav-item">
                         <a class="nav-link" href="/appointment">Appointments</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/admin/passfail">Pass | Fail Status</a>
                     </li>
                 <% } %>
             <% } %>

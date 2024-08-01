@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<%- include('layouts/header') -%>
+<body>
+    <%- include('layouts/topbar') -%>
+    <%- include('layouts/navbar', { isAuthenticated: isAuthenticated, userType: userType }) -%>
+
+    <div class="container-fluid page-header py-6 my-6 mt-0 wow fadeIn" data-wow-delay="0.1s">
+        <div class="container text-center">
+            <h1 class="display-4 text-white animated slideInDown mb-4">Examiner</h1>
+            <nav aria-label="breadcrumb animated slideInDown">
+                <ol class="breadcrumb justify-content-center mb-0">
+                    <li class="breadcrumb-item"><a class="text-white" href="/">Home</a></li>
+                    <li class="breadcrumb-item text-primary active" aria-current="page">Examiner</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+
+    <div class="container-xxl py-6">
+        <% if (successMessage) { %>
+            <div class="alert alert-success"><%= successMessage %></div>
+        <% } %>
+        <% if (errorMessage) { %>
+            <div class="alert alert-danger"><%= errorMessage %></div>
+        <% } %>
+        <div class="container mt-5">
+            <h1 class="mb-4">Examiner Page</h1>
+            <form method="get" action="/examiner">
+                <div class="form-group">
+                    <label for="testType">Filter by Test Type:</label>
+                    <select name="testType" id="testType" class="form-control">
+                        <option value="">All</option>
+                        <option value="G">G Test</option>
+                        <option value="G2">G2 Test</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary">Filter</button>
+            </form>
+
+            <h2 class="mb-3">Drivers and Appointments</h2>
+            <% users.forEach(user => { %>
+                <div class="card mb-4">
+                    <div class="card-header" style="cursor: pointer;" onclick="toggleDetails('<%= user._id %>')">
+                        <h3 class="card-title"><%= user.firstName %> <%= user.lastName %></h3>
+                    </div>
+                    <div class="card-body" id="details-<%= user._id %>" style="display: none;">
+                        <p><strong>Car Details:</strong> <%= user.carDetails %></p>
+                        <form action="/examiner/addComment" method="POST" class="mt-3">
+                            <input type="hidden" name="userId" value="<%= user._id %>">
+                            <div class="form-group">
+                                <textarea name="comment" class="form-control" rows="3" placeholder="Add a comment" required></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Add Comment</button>
+                        </form>
+                        <form action="/examiner/updatePassFailStatus" method="POST" class="mt-3">
+                            <input type="hidden" name="userId" value="<%= user._id %>">
+                            <div class="form-group">
+                                <label>Pass/Fail:</label>
+                                <select name="passFail" class="form-control">
+                                    <option value="true" <%= user.passFailStatus === true ? 'selected' : '' %>>Pass</option>
+                                    <option value="false" <%= user.passFailStatus === false ? 'selected' : '' %>>Fail</option>
+                                </select>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Update Status</button>
+                        </form>
+                    </div>
+                </div>
+            <% }); %>
+        </div>
+    </div>
+
+    <script>
+        function toggleDetails(userId) {
+            const details = document.getElementById(`details-${userId}`);
+            if (details.style.display === 'none') {
+                details.style.display = 'block';
+            } else {
+                details.style.display = 'none';
+            }
+        }
+    </script>
+</body>
+</html>

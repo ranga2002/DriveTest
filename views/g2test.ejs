@@ -22,6 +22,7 @@
             <h1>G2 Test</h1>
 
             <% if (user) { %>
+                <h1>Welcome, <%= user.firstName %>!</h1>
                 <!-- Display messages -->
                 <% if (successMessage || errorMessage) { %>
                     <div class="alert <%= successMessage ? 'alert-success' : 'alert-danger' %>">
@@ -34,7 +35,6 @@
                     <% const fields = [
                         { id: 'firstName', label: 'First Name', value: user.firstName },
                         { id: 'lastName', label: 'Last Name', value: user.lastName },
-                        { id: 'encryptedLicenseNumber', label: 'License Number', value: user.encryptedLicenseNumber },
                         { id: 'age', label: 'Age', value: user.age, type: 'number' },
                         { id: 'dob', label: 'Date of Birth', value: user.dob ? user.dob.toISOString().split('T')[0] : '', type: 'date' },
                         { id: 'carMake', label: 'Car Make', value: user.carDetails?.carMake },
@@ -57,16 +57,22 @@
                     <h2>Your Booked Appointment</h2>
                     <% 
                         const appointment = user.appointments[0];
-                        const formattedDate = new Date(appointment.date).toISOString().split('T')[0]; // YYYY-MM-DD
+                        const formattedDate = new Date(appointment.date).toISOString().split('T')[0];
                         const formatTime = (timeStr) => {
                             const [hours, minutes] = timeStr.split(':').map(Number);
                             const period = hours >= 12 ? 'PM' : 'AM';
                             return `${(hours % 12 || 12)}:${minutes.toString().padStart(2, '0')} ${period}`;
                         };
-                        const formattedTime = formatTime(appointment.time.substring(0, 5)); // Extract time and format
+                        const formattedTime = formatTime(appointment.time.substring(0, 5));
                     %>
                     <p>Date: <%= formattedDate %></p>
                     <p>Time: <%= formattedTime %></p>
+                    <p>Test Type: <%= user.testType %></p>
+                    <p>Status: <%= passFailStatus ? 'PASS' : 'FAIL' %></p>
+                    <h3>Comments</h3>
+                    <% comments.forEach(comment => { %>
+                        <p><strong>Comment:</strong> <%= comment.comment %></p>
+                    <% }) %>
                 <% } else { %>
                     <h2>Book an Appointment</h2>
                     <!-- Appointment Booking Form -->

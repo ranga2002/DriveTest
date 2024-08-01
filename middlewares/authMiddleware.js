@@ -21,3 +21,11 @@ exports.requireAdmin = (req, res, next) => {
     }
     next();
 };
+
+// Middleware to protect Examiner-only routes
+exports.requireExaminer = (req, res, next) => {
+    if (req.session.userType !== 'Examiner') {
+        return res.status(403).send('Access denied.');
+    }
+    next();
+};

@@ -16,6 +16,8 @@ const gtestController = require('./controllers/gtestController');
 const g2testController = require('./controllers/g2testController');
 const authController = require('./controllers/authController');
 const appointmentController = require('./controllers/appointmentController');
+const adminController = require('./controllers/appointmentController');
+const examinerController = require('./controllers/examinerController');
 
 const authMiddleware = require('./middlewares/authMiddleware');
 
@@ -78,6 +80,14 @@ authMiddleware.requireDriver = (req, res, next) => {
     next();
 };
 
+// Middleware to protect examiner-only routes
+authMiddleware.requireExaminer = (req, res, next) => {
+    if (req.session.userType !== 'Examiner') {
+        return res.status(403).send('Access denied.');
+    }
+    next();
+};
+
 // Listen on port 4000
 app.listen(4000, () => {
     console.log('App listening on port 4000');
@@ -111,6 +121,10 @@ app.get('/logout', authController.logout);
 // G Test Page route
 app.get('/gtest', authMiddleware.requireLogin, authMiddleware.requireDriver, gtestController.renderGTest);
 app.post('/gtest/update', authMiddleware.requireLogin, authMiddleware.requireDriver, gtestController.updateGTestData);
+app.get('/gtest/available-slots', gtestController.getAvailableSlots);
+app.post('/gtest/book', authMiddleware.requireLogin, authMiddleware.requireDriver, gtestController.bookAppointment);
+
+
 
 // G2 Test Page routes
 app.get('/g2test', authMiddleware.requireLogin, authMiddleware.requireDriver, g2testController.renderG2Test);
@@ -135,7 +149,13 @@ app.get('/appointment', authMiddleware.requireLogin, authMiddleware.requireAdmin
 // Handle the appointment creation form submission
 app.get('/appointments/slots/:date', authMiddleware.requireLogin, authMiddleware.requireAdmin, appointmentController.disableTime)
 app.post('/appointments', authMiddleware.requireLogin, authMiddleware.requireAdmin, appointmentController.createAppointment);
+app.get('/admin/passfail', authMiddleware.requireLogin, authMiddleware.requireAdmin, adminController.listCandidates);
 
+
+// Examiner routes
+app.get('/examiner', authMiddleware.requireLogin, authMiddleware.requireExaminer, examinerController.getExaminerPage);
+app.post('/examiner/addComment', examinerController.addComment);
+app.post('/examiner/updatePassFailStatus', examinerController.updatePassFailStatus);
 
 // Catch-all route for unknown paths
 app.get('*', (req, res) => {

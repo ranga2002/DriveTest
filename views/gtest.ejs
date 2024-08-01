@@ -1,18 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <%- include('layouts/header') -%>
-
 <body>
-    <!-- Topbar Start -->
     <%- include('layouts/topbar') -%>
-    <!-- Topbar End -->
-
-    <!-- Navbar Start -->
     <%- include('layouts/navbar', { isAuthenticated: isAuthenticated, userType: userType }) -%>
-    <!-- Navbar End -->
 
-    <!-- Page Header Start -->
     <div class="container-fluid page-header py-6 my-6 mt-0 wow fadeIn" data-wow-delay="0.1s">
         <div class="container text-center">
             <h1 class="display-4 text-white animated slideInDown mb-4">G Test</h1>
@@ -24,61 +16,115 @@
             </nav>
         </div>
     </div>
-    <!-- Page Header End -->
 
-    <!-- G Test Start -->
     <div class="container-xxl py-6">
         <div class="container">
-            <div class="form-box">
-                <h1>Retrieve Information</h1>
-                <% if (typeof error !== 'undefined' && error !== null) { %>
-                    <p style="color: red;"><%= error %></p>
-                    <a href="/g2test" class="btn btn-primary">Go to G2 Page</a>
-                    <a href="javascript:history.back()" class="btn btn-secondary">Go Back</a>
-                <% } else if (!user) { %>
-                    <form action="/gtest/fetch" method="POST">
-                        <label for="licenseNumber">License Number</label>
-                        <input type="text" id="licenseNumber" name="licenseNumber" placeholder="Enter your license number">
-                        <button type="submit" class="submit-button">Submit</button>
-                    </form>
+            <h1>G Test</h1>
+
+            <% if (user) { %>
+                <!-- Display messages -->
+                <% if (successMessage || errorMessage) { %>
+                    <div class="alert <%= successMessage ? 'alert-success' : 'alert-danger' %>">
+                        <%= successMessage || errorMessage %>
+                    </div>
+                <% } %>
+
+                <!-- User Details Form -->
+                <form action="/gtest/update" method="POST">
+                    <% const fields = [
+                        { id: 'firstName', label: 'First Name', value: user.firstName, disabled: true  },
+                        { id: 'lastName', label: 'Last Name', value: user.lastName, disabled: true  },
+                        { id: 'age', label: 'Age', value: user.age, type: 'number', disabled: true  },
+                        { id: 'dob', label: 'Date of Birth', value: user.dob ? user.dob.toISOString().split('T')[0] : '', type: 'date', disabled: true  },
+                        { id: 'carMake', label: 'Car Make', value: user.carDetails?.carMake },
+                        { id: 'carModel', label: 'Car Model', value: user.carDetails?.carModel },
+                        { id: 'carYear', label: 'Car Year', value: user.carDetails?.carYear, type: 'number' },
+                        { id: 'carPlate', label: 'Car Plate', value: user.carDetails?.carPlate }
+                    ]; %>
+                    <% fields.forEach(field => { %>
+                        <div class="form-group">
+                            <label for="<%= field.id %>"><%= field.label %>:</label>
+                            <input type="<%= field.type || 'text' %>" class="form-control" name="<%= field.id %>" value="<%= field.value %>" <%= field.disabled ? 'disabled' : '' %> required>
+                        </div>
+                    <% }); %>
+                    <button type="submit" class="btn btn-primary">Update Details</button>
+                </form>
+
+                <!-- Appointment Information -->
+                <% if (user.appointments.length > 0) { %>
+                    <h2>Your Booked Appointment</h2>
+                    <% 
+                        const appointment = user.appointments[0];
+                        const formattedDate = new Date(appointment.date).toISOString().split('T')[0]; // YYYY-MM-DD
+                        const formatTime = (timeStr) => {
+                            const [hours, minutes] = timeStr.split(':').map(Number);
+                            const period = hours >= 12 ? 'PM' : 'AM';
+                            return `${(hours % 12 || 12)}:${minutes.toString().padStart(2, '0')} ${period}`;
+                        };
+                        const formattedTime = formatTime(appointment.time.substring(0, 5)); // Extract time and format
+                    %>
+                    <p>Date: <%= formattedDate %></p>
+                    <p>Time: <%= formattedTime %></p>
+                    <p>Test Type: <%= user.testType %></p>
+                    <p>Status: <%= passFailStatus ? 'PASS' : 'FAIL' %></p>
+                    <h3>Comments</h3>
+                    <% comments.forEach(comment => { %>
+                        <p><strong>Comment:</strong> <%= comment.comment %></p>
+                    <% }) %>
                 <% } else { %>
-                    <form action="/gtest/update" method="POST">
-                        <input type="hidden" name="licenseNumber" value="<%= user.licenseNumber %>">
-                        <p>First Name: <%= user.firstName %></p>
-                        <p>Last Name: <%= user.lastName %></p>
-                        <p>License Number: <%= user.licenseNumber %></p>
-                        <p>Age: <%= user.age %></p>
-                        <p>Date of Birth: <%= user.dob.toISOString().split('T')[0] %></p>
+                    <h2>Book an Appointment</h2>
+                    <!-- Appointment Booking Form -->
+                    <form action="/gtest/book" method="POST">
                         <div class="form-group">
-                            <label for="carMake">Car Make:</label>
-                            <input type="text" class="form-control" name="carMake" value="<%= user.carDetails && user.carDetails.carMake ? user.carDetails.carMake : '' %>">
+                            <label for="appointmentDate">Appointment Date:</label>
+                            <input type="date" class="form-control" id="appointmentDate" name="appointmentDate" required onchange="fetchAvailableSlots(this.value)">
                         </div>
-                        <div class="form-group">
-                            <label for="carModel">Car Model:</label>
-                            <input type="text" class="form-control" name="carModel" value="<%= user.carDetails && user.carDetails.carModel ? user.carDetails.carModel : '' %>">
+                        <div class="form-group" id="timeSlotsContainer" style="display:none;">
+                            <label for="timeSlot">Available Time Slots:</label>
+                            <div id="timeSlots" class="form-control"></div>
                         </div>
-                        <div class="form-group">
-                            <label for="carYear">Car Year:</label>
-                            <input type="number" class="form-control" name="carYear" value="<%= user.carDetails && user.carDetails.carYear ? user.carDetails.carYear : '' %>">
-                        </div>
-                        <div class="form-group">
-                            <label for="carPlate">Car Plate:</label>
-                            <input type="text" class="form-control" name="carPlate" value="<%= user.carDetails && user.carDetails.carPlate ? user.carDetails.carPlate : '' %>">
-                        </div>
-                        <button type="submit" class="btn btn-primary">Update</button>
+                        <input type="hidden" id="selectedTimeSlot" name="selectedTimeSlot" required>
+                        <button type="submit" class="btn btn-primary">Book Appointment</button>
                     </form>
                 <% } %>
-            </div>
-        </div>
+            <% } else { %>
+                <p>Please <a href="/login">login</a> to view and book appointments.</p>
+            <% } %>
+        </div>    
     </div>
-    <!-- G Test End -->
 
-    <%- include('layouts/footer') -%>
+    <script>
+        function selectTimeSlot(time) {
+            document.getElementById('selectedTimeSlot').value = time;
+        }
 
-    <!-- Back to Top -->
-    <a href="#" class="btn btn-lg btn-primary btn-lg-square back-to-top"><i class="bi bi-arrow-up"></i></a>
+        async function fetchAvailableSlots(selectedDate) {
+            try {
+                const response = await fetch(`/gtest/available-slots?date=${selectedDate}`);
+                if (!response.ok) throw new Error('Network response was not ok');
+                const slots = await response.json();
+                const timeSlotsContainer = document.getElementById('timeSlotsContainer');
+                const timeSlots = document.getElementById('timeSlots');
 
-    <%- include('layouts/scripts') -%>
+                timeSlots.innerHTML = ''; // Clear previous slots
+                if (slots.length > 0) {
+                    timeSlotsContainer.style.display = 'block';
+                    slots.forEach(slot => {
+                        const button = document.createElement('button');
+                        button.type = 'button';
+                        button.className = 'btn btn-secondary m-1';
+                        button.innerText = slot.time;
+                        button.onclick = () => selectTimeSlot(slot.time);
+                        timeSlots.appendChild(button);
+                    });
+                } else {
+                    timeSlotsContainer.style.display = 'none';
+                    timeSlots.innerHTML = 'No available time slots for this date.';
+                }
+            } catch (error) {
+                console.error('Error fetching available slots:', error);
+            }
+        }
+    </script>
 </body>
-
 </html>

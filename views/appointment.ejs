@@ -1,8 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <%- include('layouts/header') -%>
-
 <body>
     <!-- Topbar Start -->
     <%- include('layouts/topbar') -%>
@@ -11,6 +9,18 @@
     <!-- Navbar Start -->
     <%- include('layouts/navbar', { isAuthenticated: isAuthenticated, userType: userType }) -%>
     <!-- Navbar End -->
+
+    <div class="container-fluid page-header py-6 my-6 mt-0 wow fadeIn" data-wow-delay="0.1s">
+        <div class="container text-center">
+            <h1 class="display-4 text-white animated slideInDown mb-4">G2 Test</h1>
+            <nav aria-label="breadcrumb animated slideInDown">
+                <ol class="breadcrumb justify-content-center mb-0">
+                    <li class="breadcrumb-item"><a class="text-white" href="/">Home</a></li>
+                    <li class="breadcrumb-item text-primary active" aria-current="page">G2 Test</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
 
     <div class="container">
         <h1>Manage Appointments</h1>
@@ -48,7 +58,7 @@
             <div id="selectedTimeSlots" class="form-group"></div>
             <button type="submit" class="btn btn-primary">Save Appointments</button>
         </form>
-              
+
     </div>
 
     <!-- Modal for error message -->
@@ -116,26 +126,22 @@
                         times.forEach(time => {
                             const slotButton = document.getElementById(`slot-${time}`);
                             if (publishedSlots.includes(time)) {
-                                slotButton.disabled = true;
-                                slotButton.classList.add('disabled');
+                                slotButton.disabled = true; // Disable button if time slot is already published
+                                slotButton.classList.add('btn-danger'); // Optional: Add a class to indicate unavailability
                             } else {
-                                slotButton.disabled = false;
-                                slotButton.classList.remove('disabled');
+                                slotButton.disabled = false; // Enable button if time slot is available
+                                slotButton.classList.remove('btn-danger'); // Optional: Remove the class indicating unavailability
                             }
                         });
                     } else {
+                        // Handle error scenario
                         console.error('Error fetching published slots:', data.message);
                     }
                 })
-                .catch(err => console.error('Fetch error:', err));
+                .catch(error => {
+                    console.error('Error fetching published slots:', error);
+                });
         }
-
-        // Show the error modal if there's an error message
-        <% if (error) { %>
-            document.addEventListener('DOMContentLoaded', function() {
-                $('#errorModal').modal('show');
-            });
-        <% } %>
     </script>
 </body>
 </html>

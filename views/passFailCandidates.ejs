@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<%- include('layouts/header') -%>
+<body>
+    <!-- Topbar Start -->
+    <%- include('layouts/topbar') -%>
+    <!-- Topbar End -->
+
+    <!-- Navbar Start -->
+    <%- include('layouts/navbar', { isAuthenticated: isAuthenticated, userType: userType }) -%>
+    <!-- Navbar End -->
+
+    <div class="container-fluid page-header py-6 my-6 mt-0 wow fadeIn" data-wow-delay="0.1s">
+        <div class="container text-center">
+            <h1 class="display-4 text-white animated slideInDown mb-4">Pass/Fail Candidates</h1>
+            <nav aria-label="breadcrumb animated slideInDown">
+                <ol class="breadcrumb justify-content-center mb-0">
+                    <li class="breadcrumb-item"><a class="text-white" href="/">Home</a></li>
+                    <li class="breadcrumb-item text-primary active" aria-current="page">Pass/Fail Candidates</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+
+    <div class="container">
+        <h2>Pass/Fail Candidates</h2>
+        <% if (typeof message !== 'undefined' && message) { %>
+            <div class="alert alert-success" role="alert">
+                <%= message %>
+            </div>
+        <% } %>
+        <% if (typeof error !== 'undefined' && error) { %>
+            <div class="alert alert-danger" role="alert">
+                <%= error %>
+            </div>
+        <% } %>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Car Details</th>
+                    <th>Test Type</th>
+                    <th>Comments</th>
+                    <th>Pass/Fail Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% users.forEach(user => { %>
+                    <tr>
+                        <td><%= user.firstName %> <%= user.lastName %></td>
+                        <td><%= user.carDetails.carMake %> <%= user.carDetails.carModel %> (<%= user.carDetails.carYear %>) - <%= user.carDetails.carPlate %></td>
+                        <td><%= user.testType %></td>
+                        <td>
+                            <ul>
+                                <% user.comments.forEach(comment => { %>
+                                    <li><%= comment.comment %> - <%= comment.examiner.firstName %> <%= comment.examiner.lastName %></li>
+                                <% }); %>
+                            </ul>
+                        </td>
+                        <td><%= user.passFailStatus ? 'Pass' : 'Fail' %></td>
+                    </tr>
+                <% }); %>
+            </tbody>
+        </table>
+    </div>
+
+    <%- include('layouts/footer') -%>
+
+    <!-- Back to Top -->
+    <a href="#" class="btn btn-lg btn-primary btn-lg-square back-to-top"><i class="bi bi-arrow-up"></i></a>
+
+    <%- include('layouts/scripts') -%>
+</body>
+</html>

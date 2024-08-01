@@ -6,7 +6,7 @@ const bcrypt = require('bcrypt');
 const UserSchema = new Schema({
     firstName: { type: String, default: 'default' },
     lastName: { type: String, default: 'default' },
-    licenseNumber: { type: String, default: 'default' },
+    licenseNumber: { type: String},
     age: { type: Number, default: 0 },
     dob: { type: Date, default: Date.now },
     username: { type: String, unique: true, required: true },
@@ -18,7 +18,9 @@ const UserSchema = new Schema({
         carYear: { type: Number, default: 0 },
         carPlate: { type: String, default: 'default' }
     },
-    // Appointment details sync
+    testType: { type: String, enum: ['G', 'G2'] },
+    comments: [{ examiner: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }, comment: String }],
+    passFailStatus: { type: Boolean, default: null },
     appointments: [{ type: Schema.Types.ObjectId, ref: 'Appointment' }]
 });
 

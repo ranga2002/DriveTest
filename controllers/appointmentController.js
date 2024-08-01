@@ -1,3 +1,4 @@
+const User = require('../models/User');
 const Appointment = require('../models/Appointment');
 
 // Create or update appointment slots for a given date
@@ -67,3 +68,59 @@ exports.disableTime = async (req, res) => {
         res.json({ success: false, message: 'Error fetching published slots' });
     }
 }
+
+// List Pass/Fail candidates with their comments
+exports.listCandidates = async (req, res) => {
+    try {
+        // Fetch only drivers who have a pass/fail status
+        const users = await User.find({ userType: 'Driver', passFailStatus: { $ne: null } })
+            .populate('comments.examiner', 'firstName lastName')
+            .exec(); // Populate examiner details in comments
+        res.render('passFailCandidates', {
+            users,
+            isAuthenticated: req.session.userId ? true : false,
+            userType: req.session.userType || null, // Pass userType to the view
+            message: req.flash('message'),
+            error: req.flash('error')
+        });
+    } catch (error) {
+        console.error(error);
+        res.render('passFailCandidates', {
+            isAuthenticated: req.session.userId ? true : false,
+            userType: req.session.userType || null, // Pass userType to the view
+            users: [], // Pass an empty array if there's an error
+            message: req.flash('message'),
+            error: 'Unable to fetch users'
+        });
+    }
+};
+
+
+// Verify Comments and Pass/Fail Status as a Driver
+exports.verifyStatus = async (req, res) => {
+    const userId = req.params.userId;
+
+    try {
+        const user = await User.findById(userId).exec();
+        if (!user) {
+            return res.status(404).send('User not found');
+        }
+
+        res.render('verifyStatus', {
+            isAuthenticated: req.session.userId ? true : false,
+            userType: req.session.userType || null,
+            user: user,
+            message: null,
+            error: null
+        });
+    } catch (err) {
+        console.error(err);
+        res.render('verifyStatus', {
+            isAuthenticated: req.session.userId ? true : false,
+            userType: req.session.userType || null,
+            user: null,
+            message: 'Error fetching user status',
+            error: true
+        });
+    }
+};
