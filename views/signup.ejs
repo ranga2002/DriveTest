@@ -45,13 +45,13 @@
                     <h2>Sign Up</h2>
                     <form action="/signup" method="POST">
                         <label for="newUsername">Username</label>
-                        <input type="text" id="newUsername" name="username" placeholder="Enter your username" required>
+                        <input type="text" id="newUsername" name="username" placeholder="Enter your username" >
                         <label for="newPassword">Password</label>
-                        <input type="password" id="newPassword" name="password" placeholder="Enter your password" required>
+                        <input type="password" id="newPassword" name="password" placeholder="Enter your password" >
                         <label for="repeatPassword">Repeat Password</label>
-                        <input type="password" id="repeatPassword" name="repeatPassword" placeholder="Repeat your password" required>
+                        <input type="password" id="repeatPassword" name="repeatPassword" placeholder="Repeat your password" >
                         <label for="userType">User Type</label>
-                        <select id="userType" name="userType" required>
+                        <select id="userType" name="userType" >
                             <option value="Driver">Driver</option>
                             <option value="Examiner">Examiner</option>
                             <option value="Admin">Admin</option>
@@ -70,5 +70,61 @@
     <a href="#" class="btn btn-lg btn-primary btn-lg-square back-to-top"><i class="bi bi-arrow-up"></i></a>
 
     <%- include('layouts/scripts') -%>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const form = document.querySelector('form');
+            const usernameInput = document.getElementById('newUsername');
+            const passwordInput = document.getElementById('newPassword');
+            const repeatPasswordInput = document.getElementById('repeatPassword');
+            const userTypeSelect = document.getElementById('userType');
+            
+            form.addEventListener('submit', function(event) {
+                let valid = true;
+
+                // Clear existing error messages
+                document.querySelectorAll('.error-message').forEach(elem => elem.remove());
+
+                // Validate username
+                const username = usernameInput.value.trim();
+                if (username.length < 3 || username.length > 20 || !/^[a-zA-Z0-9]+$/.test(username)) {
+                    displayError(usernameInput, "Username must be 3-20 characters long and alphanumeric.");
+                    valid = false;
+                }
+
+                // Validate password
+                const password = passwordInput.value.trim();
+                if (password.length < 6) {
+                    displayError(passwordInput, "Password must be at least 6 characters long.");
+                    valid = false;
+                }
+
+                // Validate repeat password
+                const repeatPassword = repeatPasswordInput.value.trim();
+                if (password !== repeatPassword) {
+                    displayError(repeatPasswordInput, "Passwords do not match.");
+                    valid = false;
+                }
+
+                // Ensure userType is selected (optional if you want to ensure it's not left at default)
+                if (userTypeSelect.value === "") {
+                    displayError(userTypeSelect, "Please select a user type.");
+                    valid = false;
+                }
+
+                if (!valid) {
+                    event.preventDefault(); // Prevent form submission if validation fails
+                }
+            });
+
+            function displayError(element, message) {
+                const error = document.createElement('p');
+                error.className = 'error-message';
+                error.textContent = message;
+                element.parentNode.insertBefore(error, element.nextSibling);
+            }
+        });
+    </script>
+    
 </body>
 </html>

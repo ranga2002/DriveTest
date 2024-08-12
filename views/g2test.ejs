@@ -24,7 +24,7 @@
             <% if (user) { %>
                 <h1>Welcome, <%= user.firstName %>!</h1>
                 <!-- Display messages -->
-                <% if (successMessage || errorMessage) { %>
+                <% if (successMessage.length>0 || errorMessage.length>0) { %>
                     <div class="alert <%= successMessage ? 'alert-success' : 'alert-danger' %>">
                         <%= successMessage || errorMessage %>
                     </div>

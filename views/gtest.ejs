@@ -23,12 +23,12 @@
 
             <% if (user) { %>
                 <!-- Display messages -->
-                <% if (successMessage || errorMessage) { %>
+                <% if (successMessage.length>0 || errorMessage.length>0) { %>
                     <div class="alert <%= successMessage ? 'alert-success' : 'alert-danger' %>">
                         <%= successMessage || errorMessage %>
                     </div>
                 <% } %>
-
+                
                 <!-- User Details Form -->
                 <form action="/gtest/update" method="POST">
                     <% const fields = [

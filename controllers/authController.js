@@ -68,7 +68,7 @@ exports.login = async (req, res) => {
             res.redirect('/appointment');
         } else {
             req.flash('success', 'Login successful.');
-            res.redirect('/');
+            res.redirect('/examiner');
         }
     } catch (err) {
         console.error("Error logging in:", err);

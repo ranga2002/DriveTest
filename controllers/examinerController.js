@@ -7,7 +7,7 @@ exports.getExaminerPage = async (req, res) => {
         const testType = req.query.testType;
         const filter = testType ? { testType } : {};
         const users = await User.find({ userType: 'Driver', ...filter });
-        res.render('examiner', { users, successMessage: req.flash('success'), errorMessage: req.flash('error') });
+        res.render('examiner', { users, successMessage: res.locals.successMessage, errorMessage: res.locals.errorMessage });
     } catch (error) {
         console.error('Error fetching drivers:', error);
         req.flash('error', 'Error fetching drivers');

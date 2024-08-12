@@ -7,8 +7,8 @@ exports.renderG2Test = async (req, res) => {
         const user = await User.findById(req.session.userId).populate('appointments');
         res.render('g2test', {
             user,
-            successMessage: req.flash('success'),
-            errorMessage: req.flash('error'),
+            successMessage: res.locals.successMessage,
+            errorMessage: res.locals.errorMessage,
             comments: user.comments,
             passFailStatus: user.passFailStatus
         });
@@ -35,7 +35,7 @@ exports.updateUserDetails = async (req, res) => {
         user.carDetails = { carMake, carModel, carYear, carPlate };
         user.testType = 'G2';
         await user.save();
-        req.flash('success', 'Details updated successfully');
+        req.flash('success', 'User data updated successfully');
         res.redirect('/g2test');
     } catch (err) {
         console.error('Error updating details:', err);

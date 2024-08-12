@@ -4,10 +4,11 @@ const Appointment = require('../models/Appointment');
 exports.renderGTest = async (req, res) => {
     try {
         const user = await User.findById(req.session.userId).populate('appointments');
+        console.log('Flash message set:', res.locals.successMessage);
         res.render('gtest', {
             user,
-            successMessage: req.flash('success'),
-            errorMessage: req.flash('error'),
+            successMessage: res.locals.successMessage,
+            errorMessage: res.locals.errorMessage,
             comments: user.comments,
             passFailStatus: user.passFailStatus
         });
@@ -38,6 +39,7 @@ exports.updateGTestData = async (req, res) => {
         user.testType = 'G'; // Set testType to 'G'
 
         await user.save();
+        req.flash('success', 'User data updated successfully');
         res.redirect('/gtest');
     } catch (error) {
         console.error('Error updating user data:', error);
@@ -58,6 +60,7 @@ exports.getAvailableSlots = async (req, res) => {
 
 exports.bookAppointment = async (req, res) => {
     const { appointmentDate, selectedTimeSlot, testType } = req.body; // Added testType
+    console.log('Booking appointment:', appointmentDate, selectedTimeSlot, testType);
     try {
         const appointment = await Appointment.findOne({ date: appointmentDate, time: selectedTimeSlot, isTimeSlotAvailable: true });
         if (!appointment) {
