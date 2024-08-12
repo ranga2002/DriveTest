@@ -24,12 +24,12 @@
 
     <div class="container">
         <h2>Pass/Fail Candidates</h2>
-        <% if (typeof message !== 'undefined' && message) { %>
+        <% if (typeof message !== 'undefined' && message.length>0) { %>
             <div class="alert alert-success" role="alert">
                 <%= message %>
             </div>
         <% } %>
-        <% if (typeof error !== 'undefined' && error) { %>
+        <% if (typeof error !== 'undefined' && error.length>0) { %>
             <div class="alert alert-danger" role="alert">
                 <%= error %>
             </div>
