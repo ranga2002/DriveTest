@@ -74,7 +74,7 @@ exports.listCandidates = async (req, res) => {
     try {
         // Fetch only drivers who have a pass/fail status
         const users = await User.find({ userType: 'Driver', passFailStatus: { $ne: null } })
-            .populate('comments.examiner', 'firstName lastName')
+            .populate('comments.examiner', 'firstName','lastName')
             .exec(); // Populate examiner details in comments
         res.render('passFailCandidates', {
             users,
